@@ -62,7 +62,7 @@ function loadExistingValues() {
       const OnSite = customProps.get('OnSite');
       const CustInteraction = customProps.get('CustInteraction');
       const Clevel = customProps.get('Clevel');
-      const Clevel = customProps.get('FullDay');
+      const FullDay = customProps.get('FullDay');
       
       if (activityType) document.getElementById('activityType').value = activityType;
       if (engagementType) document.getElementById('engagementType').value = engagementType;

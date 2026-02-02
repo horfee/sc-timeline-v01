@@ -246,7 +246,7 @@ async function buildJsonPayload(data) {
   // Clean body
   let cleanBody = data.body.replace(/[\r\n]+/g, ' ').replace(/"/g, ' ').replace(/[{}\[\]]/g, ' ').substring(0, 255); 
   if (data.FullDay) {
-	  cleanBody = "Orig. " + data.start + " -> " + data.end + " - " +  data.body.substring(0, 250);
+	  cleanBody = "Orig. " + data.start + " -> " + data.end + " - " +  cleanBody(0, 240);
   }
 // Handle PTO
   let customerEvent = data.custEvt; // Start with the captured subject

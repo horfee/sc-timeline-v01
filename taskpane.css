@@ -173,3 +173,48 @@ main {
 .tenant-link a:hover {
     text-decoration: underline;
 }
+
+/* --- Mobile Specific Adjustments --- */
+@media (max-width: 480px) {
+    body {
+        font-size: 16px; /* Larger base font for mobile readability */
+    }
+
+    header {
+        padding: 12px 15px; /* Slightly tighter header */
+    }
+
+    header h2 {
+        font-size: 16px;
+    }
+
+    main {
+        padding: 15px; /* More efficient use of space */
+    }
+
+    /* Increase touch target size for inputs and buttons */
+    .form-control {
+        padding: 12px; /* Taller inputs are easier to tap */
+        font-size: 16px; /* Prevents iOS from zooming in on focus */
+    }
+
+    .btn {
+        padding: 14px 20px; /* Larger tap area */
+        font-size: 16px;
+    }
+
+    .checkbox-group label {
+        padding: 8px 0; /* Add vertical padding to the label for easier clicking */
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 20px; /* Larger checkbox */
+        height: 20px;
+    }
+
+    /* Stack buttons vertically if they get too cramped */
+    .button-group {
+        flex-direction: column;
+        gap: 12px;
+    }
+}

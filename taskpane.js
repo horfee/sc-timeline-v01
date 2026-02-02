@@ -62,6 +62,7 @@ function loadExistingValues() {
       const OnSite = customProps.get('OnSite');
       const CustInteraction = customProps.get('CustInteraction');
       const Clevel = customProps.get('Clevel');
+      const Clevel = customProps.get('FullDay');
       
       if (activityType) document.getElementById('activityType').value = activityType;
       if (engagementType) document.getElementById('engagementType').value = engagementType;
@@ -69,6 +70,7 @@ function loadExistingValues() {
       if (OnSite === true || OnSite === 'true') document.getElementById('OnSite').checked = true;
       if (CustInteraction === true || CustInteraction === 'true') document.getElementById('CustInteraction').checked = true;
       if (Clevel === true || Clevel === 'true') document.getElementById('Clevel').checked = true;
+      if (FullDay === true || FullDay === 'true') document.getElementById('FullDay').checked = true;
       
       // CRITICAL: Call validation AFTER the values are set
       validateForm;
@@ -87,6 +89,7 @@ function saveCustomProperties(callback) {
       customProps.set('OnSite', document.getElementById('OnSite').checked);
       customProps.set('CustInteraction', document.getElementById('CustInteraction').checked);
       customProps.set('Clevel', document.getElementById('Clevel').checked);
+      customProps.set('FullDay', document.getElementById('FullDay').checked);
       
       customProps.saveAsync((saveResult) => {
         if (saveResult.status === Office.AsyncResultStatus.Succeeded) {
@@ -194,6 +197,7 @@ async function getAppointmentData(item) {
 		  data.OnSite = props.get('OnSite');
 		  data.CustInteraction = props.get('CustInteraction');
 		  data.Clevel = props.get('Clevel');
+		  data.FullDay = props.get('FullDay');
         }
         resolve(data);
       });
@@ -240,7 +244,10 @@ async function buildJsonPayload(data) {
   };
   
   // Clean body
-  let cleanBody = data.body.replace(/[\r\n]+/g, ' ').replace(/"/g, ' ').replace(/[{}\[\]]/g, ' ').substring(0, 255);  
+  let cleanBody = data.body.replace(/[\r\n]+/g, ' ').replace(/"/g, ' ').replace(/[{}\[\]]/g, ' ').substring(0, 255); 
+  if (data.FullDay) {
+	  cleanBody = "Orig. " + data.start + " -> " + data.end + " - " +  data.body.substring(0, 250);
+  }
 // Handle PTO
   let customerEvent = data.custEvt; // Start with the captured subject
   let engagementType = data.engType;
@@ -253,6 +260,7 @@ async function buildJsonPayload(data) {
   const OnSite = (data.OnSite ?? false).toString();
   const CustInteraction = (data.CustInteraction ?? false).toString();
   const Clevel = (data.Clevel ?? false).toString();
+  const FullDay = (data.FullDay ?? false).toString();
 
   // EntryID (Standard Office.js itemId)
   // Logic fix for IDs:
@@ -299,6 +307,7 @@ async function buildJsonPayload(data) {
     OnSite: OnSite,
     CustInteraction: CustInteraction,
     Clevel: Clevel,
+	FullDay: FullDay,
     Note: cleanBody
   };
   

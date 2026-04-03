@@ -112,7 +112,7 @@ Office.onReady(async (info) => {
           id: curr.type_id, 
           description: curr.type_desc,
           color: curr.type_color,
-          gobal: curr.type_global
+          global: curr.type_global
 
         });
         return acc;
@@ -122,15 +122,15 @@ Office.onReady(async (info) => {
       return;
     }
 
-    eamData = await loadDataFromEAM(tenant, organization, apiKey, "1UTLEG", 1000, [{ name: "param.user_email", type:"string", value: userEmailAddress}]);
+    eamData = await loadDataFromEAM(tenant, organization, apiKey, "1UTLEN", 1000, [{ name: "param.user_email", type:"string", value: userEmailAddress}]);
     if ( eamData.ok ) {
       eamData.data.reduce( (acc, curr) => {
         acc[curr.c_workspace] = acc[curr.c_workspace] || { description: curr.c_description || "", default: curr.c_default || false, activityTypes: [], engagementTypes: [] };
         acc[curr.c_workspace].engagementTypes.push({ 
-          id: curr.type_id, 
-          description: curr.type_desc,
-          color: curr.type_color,
-          gobal: curr.type_global});
+          id: curr.eng_id, 
+          description: curr.eng_desc,
+          color: curr.eng_color,
+          global: curr.eng_global});
         return acc;
       }, workspaces);
     } else {
@@ -147,14 +147,15 @@ Office.onReady(async (info) => {
       activityType.appendChild(new Option('-- Select Activity Type --', ''));
       engagementType.appendChild(new Option('-- Select Engagement Type --', ''));
 
-      workspaces[defaultWorkspace].activityTypes.forEach( at => {
+      const selectedWorkspace = e.target.value;
+      workspaces[selectedWorkspace].activityTypes.forEach( at => {
         const option = document.createElement('option');
         option.value = at.id;
         option.textContent = at.description;
         activityType.appendChild(option);
       });
 
-      workspaces[defaultWorkspace].engagementTypes.forEach( et => {
+      workspaces[selectedWorkspace].engagementTypes.forEach( et => {
         const option = document.createElement('option');
         option.value = et.id;
         option.textContent = et.description;
@@ -175,6 +176,7 @@ Office.onReady(async (info) => {
       }
       workspace.appendChild(option);
     });
+    
 
     //const defaultWorkspace = Object.keys(workspaces).filter( wsKey => workspaces[wsKey].default );
 

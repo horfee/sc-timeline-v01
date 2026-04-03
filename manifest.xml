@@ -22,6 +22,7 @@
   
   <AppDomains>
     <AppDomain>https://horfee.github.io/</AppDomain>
+    <AppDomain>https://eu1.eam.hxgnsmartcloud.com</AppDomain>
     <AppDomain>https://dataflow-inbound-message-prd-euc1.eam.hxgnsmartcloud.com</AppDomain>
   </AppDomains>
   

@@ -19,67 +19,46 @@
         
         <main>
             <div class="form-group">
+                <label for="workspace">Workspace:</label>
+                <select id="workspace" class="form-control" name="workspace"></select>
+            </div>
+            <div class="form-group">
                 <label for="activityType">Activity Type:</label>
-                <select id="activityType" class="form-control">
-                    <option value="">-- Select Activity Type --</option>
-                    <option value="BVA_VE">BVA / VE</option>
-                    <option value="DEMO">Demo</option>
-                    <option value="DISCOVERY">Discovery</option>
-                    <option value="HANDOVER">Handover</option>
-                    <option value="MANAGEMENT">Management/Organization</option>
-                    <option value="PREPARATION">Preparation</option>
-                    <option value="POC">POC</option>
-                    <option value="PTO">PTO</option>
-                    <option value="RFP_RFI">RFP / RFI</option>
-                    <option value="STRATEGY">Strategy</option>
-                    <option value="SUPPORT">Support</option>
-                    <option value="TRAINING">Training</option>
-                    <option value="WEBINAR">Webinar</option>
+                <select id="activityType" name="activityType" class="form-control">
+
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="engagementType">Engagement Type:</label>
-                <select id="engagementType" class="form-control">
-                    <option value="">-- Select Engagement Type --</option>
-                    <option value="CUSTOMER">Customer</option>
-                    <option value="EVENT">Event</option>
-                    <option value="INTERNAL">Internal</option>
-                    <option value="MARKETING">Marketing</option>
-                    <option value="OTHER">Other</option>
-                    <option value="PARTNER">Partner</option>
-                    <option value="PROSPECT">Prospect</option>
-                    <option value="TENANT-P">Personal Tenant</option>
-                    <option value="TENANT-S">Shared Tenant</option>
+                <select id="engagementType" name="engagementType" class="form-control">
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="customerEvent">Customer/Event:</label>
-                <input type="text" id="customerEvent" class="form-control" placeholder="Enter Customer/Event">
+                <input type="text" id="customerEvent" name="customerEvent" class="form-control" placeholder="Enter Customer/Event">
             </div>
 
             <div class="form-group checkbox-group">
-                <label>
-                    <input type="checkbox" id="OnSite" title="Check if it is in presence"> Is on Site: 
+                <label for="OnSite">
                 </label>
+                <input type="checkbox" id="OnSite" name="OnSite" title="Check if it is in presence">
             </div>
 
             <div class="form-group checkbox-group">
-                <label>
-                    <input type="checkbox" id="CustInteraction" title="Check if you meet customer"> Is with Customer: 
+                <label for="CustInteraction">
                 </label>
+                <input type="checkbox" id="CustInteraction" name="CustInteraction" title="Check if you meet customer">
             </div>
 
             <div class="form-group checkbox-group">
-                <label>
-                    <input type="checkbox" id="Clevel" title="Check if you meet an executive"> Meet VP/C-Level: 
-                </label>
+                <label for="Clevel">Meet VP/C-Level: </label>
+                <input type="checkbox" id="Clevel" name="Clevel" title="Check if you meet an executive"> 
             </div>
             <div class="form-group checkbox-group">
-                <label>
-                    <input type="checkbox" id="FullDay" title="Check if you want to report as full day(s) in Timeline"> In Timeline as full day(s): 
-                </label>
+                <label for="FullDay">In Timeline as full day(s): </label>
+                <input type="checkbox" id="FullDay" name="FullDay" title="Check if you want to report as full day(s) in Timeline"> 
             </div>
 
             <div class="button-group">

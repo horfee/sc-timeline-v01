@@ -1,26 +1,191 @@
 /* global Office  v.001 */
 
-Office.onReady((info) => {
+eamDataConverters = {
+  "MIXVARCHAR": (val) => val,
+  "VARCHAR": (val) => val,
+  "NUMBER" : (val) => parseFloat(val),
+  "LONG" : (val) => parseInt(val),
+  "CONTAINS": (val) => val.split(','),
+  "CURRENCY": (val) => parseFloat(val),
+  "DECIMAL" : (val) => parseFloat(val),
+  "DURATION" : (val) => parseInt(val), // Assuming duration in minutes or similar
+  "DATE" : (val) => new Date(val),
+  "DATETIME" : (val) => new Date(val),
+  "TSMIDNIGHT" : (val) => new Date(val), // Assuming it's a timestamp at midnight
+  "DEPENDENT" : (val) => val, // No specific conversion, just return the value
+  "CLOB" : (val) => val, // Assuming CLOB is returned as a string
+  "CHKBOOLEAN": (val) => val === '1' || val === 'true' || val === true
+}
+convert = (stringValue, dataType) => {
+  const converter = eamDataConverters[dataType] || ((val) => val); // Default to identity function if no converter found
+  return converter(stringValue);
+};
 
-  if (info.host === Office.HostType.Outlook) {
+
+loadDataFromEAM = async (
+  tenant,//: string,
+  organization,//: string,
+  apiKey,//: string,
+  gridName,//: string,
+  numberOfRecord,//: number,
+  parameters,//: [{name: string, type: string, value: object}]
+) => {
+  const eamData = await fetch( 'https://eu1.eam.hxgnsmartcloud.com/axis/restservices/grids', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'tenant': tenant,
+      'organization': organization,
+      'X-API-KEY': apiKey
+    },
+    body: JSON.stringify(
+      {
+        "GRID": { "GRID_NAME": gridName, "USER_FUNCTION_NAME": gridName, "NUMBER_OF_ROWS_FIRST_RETURNED": numberOfRecord || 1000, "CURSOR_POSITION": 0 },
+        "GRID_TYPE": { "TYPE": "LIST" },
+        "REQUEST_TYPE": "LIST.HEAD_DATA.STORED",
+
+        "LOV": {
+          "LOV_PARAMETERS": {
+            "LOV_PARAMETER": (parameters || []).map( param => { return {
+              "ALIAS_NAME": param.name,
+              "TYPE": param.type,
+              "VALUE": "" + param.value
+            };})
+          }
+        }
+      })
+  });
+
+  if ( eamData.ok ) {
+      const eamJson = await eamData.json();
+      const activityTypesOfWorkspaces = eamJson.Result?.ResultData?.DATARECORD?.map( record => {
+        const result = {};
+        // building first record object
+        record.DATAFIELD.forEach( field => {
+          result[field.FIELDNAME] = convert(field.FIELDVALUE, field.DATATYPE);
+        });
+        return result;
+      });
+      return { ok: true, data: activityTypesOfWorkspaces};
+  }
+  return { ok: false, detail: eamData};
+}
+
+Office.onReady(async (info) => {
+
+  let tenant = "HXGNDEMO0016_DEM";
+  let organization = "*";
+  let apiKey = 'aefa7f2bf2-78d4-4d87-aac7-f2f6d2869f4a';
+
+  const workspaces = {
+    /*
+    workspace_1: { 
+      description : "",
+      activityTypes: [
+        { id: "", description: "", color: ""}
+      ],
+      engagementTypes: [
+        ]
+    }
+     */
+  };
+
+  if ( info.host === Office.HostType.Outlook) {
     document.getElementById('btnSync').onclick = syncToTimeline;
     document.getElementById('btnCancel').onclick = closePane;
     
+    const workspace = document.getElementById('workspace');
     const activityType = document.getElementById('activityType');
     const engagementType = document.getElementById('engagementType');
     const customerEvent = document.getElementById('customerEvent');
     
+    const userEmailAddress = Office.context.mailbox.userProfile.emailAddress;
+    
+
+    let eamData = await loadDataFromEAM(tenant, organization, apiKey, "1UTLAC", 1000, [{ name: "param.user_email", type:"string", value: userEmailAddress}]);
+    if ( eamData.ok ) {
+      eamData.data.reduce( (acc, curr) => {
+        // merging all records from the same workspace together
+        acc[curr.c_workspace] = acc[curr.c_workspace] || { description: curr.c_description || "", default: curr.c_default || false, activityTypes: [], engagementTypes: [] };
+        acc[curr.c_workspace].activityTypes.push({ 
+          id: curr.type_id, 
+          description: curr.type_desc,
+          color: curr.type_color,
+          gobal: curr.type_global
+
+        });
+        return acc;
+      }, workspaces);
+    } else {
+      alert("Error fetching data from EAM: " + eamData.detail.status + " - " + eamData.detail.statusText);
+      return;
+    }
+
+    eamData = await loadDataFromEAM(tenant, organization, apiKey, "1UTLEG", 1000, [{ name: "param.user_email", type:"string", value: userEmailAddress}]);
+    if ( eamData.ok ) {
+      eamData.data.reduce( (acc, curr) => {
+        acc[curr.c_workspace] = acc[curr.c_workspace] || { description: curr.c_description || "", default: curr.c_default || false, activityTypes: [], engagementTypes: [] };
+        acc[curr.c_workspace].engagementTypes.push({ 
+          id: curr.type_id, 
+          description: curr.type_desc,
+          color: curr.type_color,
+          gobal: curr.type_global});
+        return acc;
+      }, workspaces);
+    } else {
+      alert("Error fetching data from EAM: " + eamData.detail.status + " - " + eamData.detail.statusText);
+      return;
+    }
+
+
+    workspace.addEventListener('change', (e) => {
+      // we must empty all drop down menu
+      activityType.innerHTML = '';
+      engagementType.innerHTML = '';
+
+      activityType.appendChild(new Option('-- Select Activity Type --', ''));
+      engagementType.appendChild(new Option('-- Select Engagement Type --', ''));
+
+      workspaces[defaultWorkspace].activityTypes.forEach( at => {
+        const option = document.createElement('option');
+        option.value = at.id;
+        option.textContent = at.description;
+        activityType.appendChild(option);
+      });
+
+      workspaces[defaultWorkspace].engagementTypes.forEach( et => {
+        const option = document.createElement('option');
+        option.value = et.id;
+        option.textContent = et.description;
+        engagementType.appendChild(option);
+      });
+      
+    });
+
+    workspace.innerHTML = '';
+    Object.keys(workspaces).forEach( wsKey => {
+      const ws = workspaces[wsKey];
+      const option = document.createElement('option');
+      option.value = wsKey;
+      option.textContent = ws.description || wsKey;
+      if ( ws.default ) {
+        option.setAttribute('default', '');
+        option.setAttribute('selected', 'selected');
+      }
+      workspace.appendChild(option);
+    });
+
+    //const defaultWorkspace = Object.keys(workspaces).filter( wsKey => workspaces[wsKey].default );
+
     activityType.addEventListener('change', validateForm);
     engagementType.addEventListener('change',  validateForm);
     customerEvent.addEventListener('input', validateForm);
     
-	// Initial load
-	console.log("");
-    loadExistingValues();
+	  // Initial load
+	  loadExistingValues();
     
     // Run validation
-	console.log("");
-    validateForm();
+	  validateForm();
   }
 });
 
@@ -73,7 +238,7 @@ function loadExistingValues() {
       if (FullDay === true || FullDay === 'true') document.getElementById('FullDay').checked = true;
       
       // CRITICAL: Call validation AFTER the values are set
-      validateForm;
+      validateForm();
     }
   });
 }
@@ -327,6 +492,4 @@ function closePane() {
 
 
 }
-
-
 

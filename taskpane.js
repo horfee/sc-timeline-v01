@@ -32,6 +32,7 @@ loadDataFromEAM = async (
 ) => {
   const eamData = await fetch( 'https://eu1.eam.hxgnsmartcloud.com/axis/restservices/grids', {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       'tenant': tenant,
